@@ -126,8 +126,8 @@ def Plot_a_b(y_t, x_t):
     fig, ax1 = plt.subplots()
     fig.set_size_inches(10, 3)
     
+    # PLOT question a) ----------------------------------------------------
     ax1.hlines(y=0, xmin = -1, xmax = len(y_t)+1, linestyle='-', color = 'black', lw =1)
-    # plt.set_ylim(-0.0375, 0.05)
     ax1.set_ylim(-0.0375, 0.05)
     ax1.set_xlim(-5, 947)
     #ax1.set_ylabel('Demeaned Returns')
@@ -138,7 +138,8 @@ def Plot_a_b(y_t, x_t):
             ax1.spines[axis].set_linewidth(1.5)
         else:
             ax1.spines[axis].set_visible(False)
-    
+            
+    # PLOT question b) ----------------------------------------------------
     fig, ax2 = plt.subplots()
     fig.set_size_inches(10, 3)
     ax2.plot(x_t, color = 'slateblue', lw  =1)
@@ -163,7 +164,7 @@ def Plot_KF(x_t, a, ftsize, lw):
     
     t = np.array([i for i in range(1,945+1)])
     
-    # SUBPLOT 1 upper left ------------------------------------------------
+    # SUBPLOT 1 above -----------------------------------------------------
     ax1.scatter(t, x_t, color = "darkslateblue", s = 12)
     ax1.plot(t[1:], a[1:-1])
     ax1.tick_params(axis='both', which='major', labelsize=ftsize, width = lw)
@@ -175,8 +176,7 @@ def Plot_KF(x_t, a, ftsize, lw):
         else:
             ax1.spines[axis].set_visible(False)
             
-    # SUBPLOT 1 upper left ------------------------------------------------
-    #ax1.scatter(t, x_t, color = "darkslateblue", s = 12)
+    # SUBPLOT 2 below  ---------------------------------------------------
     ax2.plot(t[1:], a[1:-1])
     ax2.tick_params(axis='both', which='major', labelsize=ftsize, width = lw)
     ax2.set_xlim(-5, 947)
@@ -197,8 +197,9 @@ def Plot_KS(x_t, alpha_hat, ftsize, lw):
     fig1, (ax1, ax2) = plt.subplots(2, 1)
     fig1.set_size_inches(12, 6)
     alpha_hat = [float(el) for el in alpha_hat]
-    
     t = np.array([i for i in range(1,945+1)])
+    
+    # SUBPLOT 1 above -----------------------------------------------------
     ax1.scatter(t, x_t, color = "darkslateblue", s = 12)
     ax1.plot(alpha_hat)
     ax1.tick_params(axis='both', which='major', labelsize=ftsize, width = lw)
@@ -210,6 +211,7 @@ def Plot_KS(x_t, alpha_hat, ftsize, lw):
         else:
             ax1.spines[axis].set_visible(False)
             
+    # SUBPLOT 2 below -----------------------------------------------------
     ax2.plot(alpha_hat)
     ax2.tick_params(axis='both', which='major', labelsize=ftsize, width = lw)
     ax2.set_xlim([-5, 947])
@@ -223,7 +225,7 @@ def Plot_KS(x_t, alpha_hat, ftsize, lw):
             
 def Plot_H(H_filter, H_smoother, ftsize, lw): 
     """
-    Plots the Kalman Smoother
+    Plots the filtered (E(H_t | Y_t)) and smoothed (E(H_t | Y_n))
     """
     
     fig1, ax1 = plt.subplots()
@@ -244,24 +246,28 @@ def Plot_H(H_filter, H_smoother, ftsize, lw):
 
 
 def main():
-    y_t, y_t_demeaned, x_t = get_xt_yt()
+    # Get the returns, demeaned returns and the log(demeaned returns^2) from the data in the xlsx file
+    y_t, y_t_demeaned, x_t = get_xt_yt() 
     
+    # Get and print estimates of phi, sigma_eta and omega
     phi_hat, sigma_eta_hat, omega_hat = estimate_params(x_t) 
-    a1 = 0
-    p1 = 10 ** 7
-    a, P, v_t, F_t, K_t, L_t, q005, q095, n = Kalman_Filter(x_t, a1, p1, sigma_eta_hat, phi_hat, omega_hat)
-    r_t, alpha_hat, N_t, V_t, q005, q095, eps_hat, var_eps_yn, eta_hat, var_eta_yn, D = Kalman_Smoother(n, v_t, F_t, L_t, a, P, x_t, K_t, sigma_eta_hat, phi_hat, omega_hat)
-    print(len(alpha_hat))
-
-    H_filter = np.array([float(el) for el in  a[:-1]]) - x_t
-    H_smoother = np.array([float(el) for el in  alpha_hat]) - x_t
-    
-    
     print("estimate phi         = ", np.round(phi_hat, 3))
     print("estimate omega       = ", np.round(omega_hat, 3))
     print("estimate sigma_eta   = ", np.round(sigma_eta_hat, 3))
     
-    #Plot_a_b(y_t_demeaned, x_t)
+    
+    # Perform Kalman Filter and Smoother with the estimates just obtained
+    a1 = 0
+    p1 = 10 ** 7
+    a, P, v_t, F_t, K_t, L_t, q005, q095, n = Kalman_Filter(x_t, a1, p1, sigma_eta_hat, phi_hat, omega_hat)
+    r_t, alpha_hat, N_t, V_t, q005, q095, eps_hat, var_eps_yn, eta_hat, var_eta_yn, D = Kalman_Smoother(n, v_t, F_t, L_t, a, P, x_t, K_t, sigma_eta_hat, phi_hat, omega_hat)
+    
+    # Get filtered (E(H_t | Y_t)) and smoothed (E(H_t | Y_n))
+    H_filter = np.array([float(el) for el in  a[:-1]]) - x_t
+    H_smoother = np.array([float(el) for el in  alpha_hat]) - x_t
+    
+    # Plot results 
+    Plot_a_b(y_t_demeaned, x_t) 
     Plot_KF(x_t = x_t, a = a, ftsize = 12, lw =1.5)
     Plot_KS(x_t = x_t, alpha_hat = alpha_hat, ftsize = 12, lw =1.5)
     Plot_H(H_filter,H_smoother, ftsize =12, lw =1.5)
