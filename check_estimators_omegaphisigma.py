@@ -14,8 +14,8 @@ def simulatedata(n, omega, phi, sigma_eta):
     return x, h[1:]
 
 
-omega, phi, sigma_eta = 0.2, 0.999, 1.77
-x, h = simulatedata(100000, omega, phi, sigma_eta) # simulate from equation (2) of the assignment 
+omega, phi, sigma_eta = -0.0096901, 0.99899503,  0.01878614
+x, h = simulatedata(10000, omega, phi, sigma_eta) # simulate from equation (2) of the assignment 
 
 a = np.mean(x)                 # sample mean
 b = np.var(x)                  # sample variance
@@ -28,10 +28,10 @@ estimate_sigma_eta_2  = np.sqrt((b  - (np.pi **2) /2) * (1 - estimate_phi **2))
 estimate_omega = (1 - estimate_phi) * (a + 1.27)
 
 
-print("real     phi           = ", phi)
-print("estimate phi           = ", np.round(estimate_phi, 2))
-print("real     omega         = ", omega)
-print("estimate omega         = ", np.round(estimate_omega, 2))
-print("real     sigma_eta     = ", sigma_eta)
-print("estimate sigma_eta     = ", np.round(estimate_sigma_eta, 2))
-print("estimate sigma_eta_2   = ", np.round(estimate_sigma_eta_2, 2))
+print("real     phi           = ", np.round(phi,4))
+print("estimate phi           = ", np.round(estimate_phi, 4))
+print("real     omega         = ", np.round(omega,4))
+print("estimate omega         = ", np.round(estimate_omega, 4))
+print("real     sigma_eta     = ", np.round(sigma_eta,4))
+print("estimate sigma_eta     = ", np.round(estimate_sigma_eta, 4))
+print("estimate sigma_eta_2   = ", np.round(estimate_sigma_eta_2, 4))
