@@ -171,12 +171,6 @@ def main ():
     plt.ylabel("Log (y_t ^2) ")
     plt.savefig(" Transformed data ")
     plt.show ()
-
-    #SPX =np.genfromtxt (" SPX . csv ", delimiter =',', dtype =float , skip_header = True )
-    #prices = SPX [: ,17]
-    #RV=SPX[: ,4][1:]
-    #prices =np. array ( calculate_returns ( prices ))
-    #shift_transformed_prices = TransformData ( prices )
     
     omega ,phi , sigma_eta = optimize_variances (( transformed_data -1.27) )
     #omega ,phi , sigma_eta = -0.0457954, 0.99598032,  0.01142509
@@ -194,46 +188,51 @@ def main ():
     plt.show()
     
     plt.figure()
-    plt.plot(a- omega /(1 - phi ),label =" Filtered estimate based H_t ")
+    plt.plot(a- omega /(1 - phi),label =" Filtered estimate based H_t ")
     plt.plot(alpha - omega /(1 - phi ),label =" Smoothed estimate based H_t")
     plt.legend()
     plt.xlabel(" Observation ")
     plt.savefig(" H_t estimates ")
     plt.show()
-    return v,a,P,F,K
+
+
+    SPX =np.genfromtxt (" SPX . csv ", delimiter =',', dtype = float , skip_header = True )
+    prices = SPX [: ,17]
+    RV=SPX[: ,4][1:]
+    prices =np. array ( calculate_returns ( prices ))
+    shift_transformed_prices = TransformData ( prices )
+    
+    omega_SPX , phi_SPX , sigma_eta_SPX = optimize_variances((shift_transformed_prices))
+    omega_SPX_RV, phi_SPX_RV, sigma_eta_SPX_RV, beta_SPX_RV = optimize_variances2 (shift_transformed_prices ,RV)
+    v_SPX, a_SPX, P_SPX , F_SPX, K_SPX = kalman_filter(shift_transformed_prices, sigma_u_2, sigma_eta_SPX, omega_SPX, phi_SPX)
+
+    alpha_SPX ,V_SPX ,r_SPX , N_SPX = smoothing_filter ( shift_transformed_prices ,K_SPX ,a_SPX ,F_SPX ,
+    v_SPX , P_SPX )
+    
+    v_SPX_RV , a_SPX_RV , P_SPX_RV , F_SPX_RV , K_SPX_RV = kalman_filter_RV ( shift_transformed_prices ,sigma_u_2 , sigma_eta_SPX_RV , omega_SPX_RV , phi_SPX_RV , beta_SPX_RV ,RV)
+    alpha_SPX_RV , V_SPX_RV , r_SPX_RV , N_SPX_RV = smoothing_filter_RV ( shift_transformed_prices , K_SPX_RV , a_SPX_RV , F_SPX_RV , v_SPX_RV , P_SPX_RV , beta_SPX_RV ,RV)
+    
+    plt.plot(shift_transformed_prices ,'o',label ="Log( y_t ^2) ")
+    plt.plot(alpha_SPX , label =" Smoothed estimate SPX ")
+    plt.plot(alpha_SPX_RV , label =" Smoothed estimate SPX with RV")
+    plt.legend ()
+    plt.xlabel (" Observation ")
+    plt.savefig (" Transformed data SPX ")
+    plt.show ()
     
     
-# omega_SPX , phi_SPX , sigma_eta_SPX = optimize_variances (( shift_transformed_prices ))
-# omega_SPX_RV , phi_SPX_RV , sigma_eta_SPX_RV , beta_SPX_RV = optimize_variances2 (shift_transformed_prices ,RV)
+    plt.plot (a_SPX - omega_SPX /(1 - phi_SPX ),label =" Filtered estimate based H_t ")
+    plt.plot ( alpha_SPX - omega_SPX /(1 - phi_SPX ),label =" Smoothed estimate based H_t ")
+    plt.xlabel (" Observation ")
+    plt.savefig (" H_t estimates SPX ")
+    plt.legend ()
+    plt.show ()
+    
+    plt.plot(a_SPX_RV -( omega_SPX_RV )/(1 - phi_SPX_RV ),label =" Filtered estimate based H_t")
+    plt.plot(alpha_SPX_RV -( omega_SPX_RV )/(1 - phi_SPX_RV ),label =" Smoothed estimate based H_t ")
+    plt.xlabel(" Observation ")
+    plt.savefig(" H_t estimates SPX with RV")
+    plt.legend()
+    plt.show()
 
-# v_SPX ,a_SPX ,P_SPX ,F_SPX , K_SPX = kalman_filter ( shift_transformed_prices , sigma_u_2 ,sigma_eta_SPX , omega_SPX , phi_SPX )
-
-# alpha_SPX ,V_SPX ,r_SPX , N_SPX = smoothing_filter ( shift_transformed_prices ,K_SPX ,a_SPX ,F_SPX ,
-# v_SPX , P_SPX )
-# v_SPX_RV , a_SPX_RV , P_SPX_RV , F_SPX_RV , K_SPX_RV = kalman_filter_RV ( shift_transformed_prices ,sigma_u_2 , sigma_eta_SPX_RV , omega_SPX_RV , phi_SPX_RV , beta_SPX_RV ,RV)
-# alpha_SPX_RV , V_SPX_RV , r_SPX_RV , N_SPX_RV = smoothing_filter_RV ( shift_transformed_prices , K_SPX_RV , a_SPX_RV , F_SPX_RV , v_SPX_RV , P_SPX_RV , beta_SPX_RV ,RV)
-
-# plt.plot(shift_transformed_prices ,’o’,label ="Log( y_t ^2) ")
-# plt.plot(alpha_SPX , label =" Smoothed estimate SPX ")
-# plt.plot(alpha_SPX_RV , label =" Smoothed estimate SPX with RV")
-# plt.legend ()
-# plt.xlabel (" Observation ")
-# plt.savefig (" Transformed data SPX ")
-# plt.show ()
-
-
-# plt.plot (a_SPX - omega_SPX /(1 - phi_SPX ),label =" Filtered estimate based H_t ")
-# plt.plot ( alpha_SPX - omega_SPX /(1 - phi_SPX ),label =" Smoothed estimate based H_t ")
-# plt.xlabel (" Observation ")
-# plt.savefig (" H_t estimates SPX ")
-# plt.legend ()
-# plt.show ()
-
-# plt.plot(a_SPX_RV -( omega_SPX_RV )/(1 - phi_SPX_RV ),label =" Filtered estimate based H_t")
-# plt.plot(alpha_SPX_RV -( omega_SPX_RV )/(1 - phi_SPX_RV ),label =" Smoothed estimate based H_t ")
-# plt.xlabel(" Observation ")
-# plt.savefig(" H_t estimates SPX with RV")
-# plt.legend()
-# plt.show()
-
-v,a,P,F,K = main()
+main()

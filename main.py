@@ -28,20 +28,18 @@ def mm_estimate(x_t):
     return (phi_0, sigma_eta_0, omega_0)
 
 
-def Log_L(parameters, data):
-    phi = np.exp(parameters[0]) / (1 + np.exp(parameters[0]))
-    sigma_eta = np.exp(parameters[1])
-    omega = parameters[2]
-    a, P, v, F, K, L, n = Kalman_Filter(data, phi, sigma_eta, omega)
+def Log_L(params, data):
+    a, P, v, F, K, L, n = Kalman_Filter(data, params[0], params[1], params[2])
     v = np.array([float(el) for el in v]) 
     F = np.array([float(el) for el in F]) 
-    value =-(n)/2 * np.log(2 * np.pi) - 0.5 * np.sum(np.log(F) + ((v ** 2) / F))
+    value =-(n/2) * np.log(2 * np.pi) - 0.5 * np.sum(np.log(F) + ((v ** 2) / F))
     return -1 * value
  
 def Find_MLE(data, init):
-    result = minimize(Log_L, init, args =(data), method ='BFGS')
+    result = minimize(Log_L, init, args =(data), bounds =((-1,1),(0, 10),(None, None)))
+    print(result)
     phi, sigma, omega = result.x
-    return np.exp(phi) / (1+ np.exp(phi)), np.exp(sigma), omega
+    return phi, sigma, omega
 
 
 def inverse(M):
